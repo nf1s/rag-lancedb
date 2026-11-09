@@ -8,7 +8,8 @@ REGISTRY="127.0.0.1:${REGISTRY_PORT}"
 
 if ! colima status >/dev/null 2>&1; then
   echo "==> starting colima (kubernetes)"
-  colima start --kubernetes --cpu 6 --memory 12 --disk 60
+  # No --disk flag: Colima will not shrink an existing instance's disk.
+  colima start --kubernetes --cpu 6 --memory 12
 else
   echo "==> colima already running"
 fi
