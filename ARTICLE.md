@@ -1,6 +1,6 @@
 ---
 title: "How to use LanceDB for RAG: hybrid search, one table per workspace, and the single-writer catch"
-published: false
+published: true
 description: "A field report from building a local RAG stack on k3s: table design, replace-by-source ingest, native FTS + RRF hybrid search, per-workspace tables, and the embedded-database constraint that shapes the whole architecture."
 tags: rag, lancedb, python, kubernetes
 cover_image: https://raw.githubusercontent.com/nf1s/rag-lancedb/main/assets/cover-wide.png
@@ -153,7 +153,7 @@ The full source is on GitHub: [nf1s/rag-lancedb](https://github.com/nf1s/rag-lan
 
 ```bash
 make up                 # Colima + k3s + registry + Skaffold config
-LLM_PORT=11434 LLM_MODEL=<your-model> make config
+LLM_PORT=11434 LLM_MODEL=qwen3.8:27b-mlx make config
 make run                # build, push, Helm deploy
 make smoke              # port-forward + end-to-end check
 make test               # 65 tests, no cluster needed
