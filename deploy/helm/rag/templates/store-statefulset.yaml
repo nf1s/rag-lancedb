@@ -1,0 +1,87 @@
+{{- if ne (int .Values.store.replicas) 1 }}
+{{- fail "store.replicas must be 1: LanceDB on a local filesystem allows a single writer" }}
+{{- end }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "rag.fullname" . }}-store
+  labels:
+    {{- include "rag.labels" . | nindent 4 }}
+    app.kubernetes.io/component: store
+spec:
+  serviceName: {{ include "rag.fullname" . }}-store
+  replicas: {{ .Values.store.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: store
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: store
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: store
+          image: "{{ .Values.store.image.repository }}:{{ .Values.store.image.tag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command:
+            - uvicorn
+            - store.main:app
+            - --host=0.0.0.0
+            - --port={{ .Values.store.port }}
+            - --workers=1
+            {{- if .Values.store.devReload }}
+            - --reload
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.store.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "rag.fullname" . }}-config
+          env:
+            - name: BOOTSTRAP_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "rag.authSecretName" . }}
+                  key: BOOTSTRAP_ADMIN_USER
+            - name: BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "rag.authSecretName" . }}
+                  key: BOOTSTRAP_ADMIN_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.store.resources | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.store.storage }}

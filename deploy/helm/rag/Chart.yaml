@@ -1,0 +1,6 @@
+apiVersion: v2
+name: rag
+description: Retrieval-augmented generation on LanceDB with a FastAPI backend and Streamlit UI
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rag.fullname" . }}-config
+  labels:
+    {{- include "rag.labels" . | nindent 4 }}
+data:
+  LANCEDB_URI: {{ .Values.store.dataPath | quote }}
+  TABLE_NAME: "documents"
+  SESSION_TTL_HOURS: {{ .Values.auth.sessionTtlHours | quote }}
+  EMBEDDING_MODEL: {{ .Values.embedding.model | quote }}
+  EMBEDDING_DIM: {{ .Values.embedding.dim | quote }}
+  TOP_K: {{ .Values.retrieval.topK | quote }}
+  RETRIEVAL_MODE: {{ .Values.retrieval.mode | quote }}
+  CHUNK_SIZE: {{ .Values.retrieval.chunkSize | quote }}
+  CHUNK_OVERLAP: {{ .Values.retrieval.chunkOverlap | quote }}
+  MAX_CONTEXT_TOKENS: {{ .Values.retrieval.maxContextTokens | quote }}
+  STORE_URL: {{ printf "http://%s-store:%v" (include "rag.fullname" .) .Values.store.port | quote }}
+  LLM_BASE_URL: {{ .Values.llm.baseUrl | quote }}
+  LLM_MODEL: {{ .Values.llm.model | quote }}
+  LLM_TIMEOUT_SECONDS: {{ .Values.llm.timeoutSeconds | quote }}
+  LLM_HEALTH_TIMEOUT_SECONDS: {{ .Values.llm.healthTimeoutSeconds | quote }}
+  API_URL: {{ printf "http://%s-api:%v" (include "rag.fullname" .) .Values.api.port | quote }}
+  LOG_LEVEL: "INFO"

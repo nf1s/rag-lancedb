@@ -1,0 +1,20 @@
+RAG on LanceDB is deployed.
+
+UI:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "rag.fullname" . }}-ui {{ .Values.ui.port }}:{{ .Values.ui.port }}
+  open http://localhost:{{ .Values.ui.port }}
+
+API docs:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "rag.fullname" . }}-api {{ .Values.api.port }}:{{ .Values.api.port }}
+  open http://localhost:{{ .Values.api.port }}/docs
+
+Sign in as "{{ .Values.auth.bootstrapAdmin.username }}". Retrieve the bootstrap password:
+  kubectl -n {{ .Release.Namespace }} get secret {{ include "rag.authSecretName" . }} -o jsonpath='{.data.BOOTSTRAP_ADMIN_PASSWORD}' | base64 -d
+
+The bootstrap account is created only once, when the metadata database is empty.
+Manage users, workspaces and members from the Admin tab in the UI.
+{{- if and (not .Values.auth.existingSecret) (eq .Values.auth.bootstrapAdmin.password "changeme") }}
+
+WARNING: the default bootstrap password is "changeme". Set auth.bootstrapAdmin.password
+or auth.existingSecret before exposing this release beyond your local machine.
+{{- end }}

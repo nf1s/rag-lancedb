@@ -1,0 +1,14 @@
+.venv
+.git
+.pytest_cache
+.ruff_cache
+__pycache__
+*.pyc
+data
+deploy
+tests
+PLAN.md
+README.md
+scripts
+Makefile
+skaffold.yaml

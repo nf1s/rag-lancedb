@@ -1,0 +1,71 @@
+apiVersion: skaffold/v4beta9
+kind: Config
+metadata:
+  name: rag-lancedb
+
+build:
+  # The Colima VM is arm64; override any global DOCKER_DEFAULT_PLATFORM=amd64.
+  platforms: ["linux/arm64"]
+  tagPolicy:
+    dateTime: {}
+  local:
+    push: true
+    useDockerCLI: true
+  artifacts:
+    - image: rag-store
+      context: .
+      docker:
+        dockerfile: Dockerfile
+        target: store
+    - image: rag-api
+      context: .
+      docker:
+        dockerfile: Dockerfile
+        target: api
+      sync:
+        manual:
+          - src: "src/api/**"
+            dest: /app/src/api
+          - src: "src/common/**"
+            dest: /app/src/common
+    - image: rag-ui
+      context: .
+      docker:
+        dockerfile: Dockerfile
+        target: ui
+      sync:
+        manual:
+          - src: "ui/**"
+            dest: /app/ui
+
+deploy:
+  kubeContext: colima
+  helm:
+    releases:
+      - name: rag
+        chartPath: deploy/helm/rag
+        namespace: rag
+        createNamespace: true
+        valuesFiles:
+          - deploy/helm/rag/values.yaml
+          - deploy/local.values.yaml
+        setValueTemplates:
+          store.image.repository: "{{.IMAGE_REPO_rag_store}}"
+          store.image.tag: "{{.IMAGE_TAG_rag_store}}"
+          api.image.repository: "{{.IMAGE_REPO_rag_api}}"
+          api.image.tag: "{{.IMAGE_TAG_rag_api}}"
+          ui.image.repository: "{{.IMAGE_REPO_rag_ui}}"
+          ui.image.tag: "{{.IMAGE_TAG_rag_ui}}"
+        wait: true
+
+portForward:
+  - resourceType: service
+    resourceName: rag-api
+    namespace: rag
+    port: 8080
+    localPort: 8080
+  - resourceType: service
+    resourceName: rag-ui
+    namespace: rag
+    port: 8501
+    localPort: 8501

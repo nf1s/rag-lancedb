@@ -1,0 +1,85 @@
+imagePullPolicy: Always
+
+auth:
+  # Bootstrap credentials are used only when the SQLite user table is empty.
+  # Change the password (or switch to existingSecret) before exposing the UI.
+  bootstrapAdmin:
+    username: admin
+    password: changeme
+  # Use an existing Secret with BOOTSTRAP_ADMIN_USER and BOOTSTRAP_ADMIN_PASSWORD keys.
+  existingSecret: ""
+  sessionTtlHours: 12
+
+embedding:
+  model: BAAI/bge-small-en-v1.5
+  dim: 384
+
+retrieval:
+  topK: 5
+  mode: hybrid
+  chunkSize: 400
+  chunkOverlap: 50
+  maxContextTokens: 3000
+
+llm:
+  baseUrl: http://localhost:1234/v1
+  model: qwen2.5-7b-instruct
+  apiKey: lm-studio
+  # Use an existing Secret with an `apiKey` key instead of the plain value above.
+  existingSecret: ""
+  timeoutSeconds: 120
+  healthTimeoutSeconds: 3
+
+store:
+  # Must stay 1: LanceDB on a local filesystem allows a single writer.
+  replicas: 1
+  port: 8081
+  devReload: false
+  dataPath: /data/lancedb
+  storage: 5Gi
+  image:
+    repository: rag-store
+    tag: latest
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+
+api:
+  replicas: 1
+  port: 8080
+  devReload: false
+  image:
+    repository: rag-api
+    tag: latest
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+ui:
+  replicas: 1
+  port: 8501
+  devReload: false
+  image:
+    repository: rag-ui
+    tag: latest
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+ingress:
+  enabled: false
+  className: traefik
+  host: rag.localhost
+  apiHost: rag-api.localhost
