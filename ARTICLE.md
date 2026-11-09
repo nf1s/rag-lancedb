@@ -10,6 +10,8 @@ LanceDB is not a server. It is a library you import, and it reads and writes a d
 
 I spent the last stretch building a local RAG stack on it: Markdown/text in, hybrid retrieval, streamed answers with citations, all on a Colima k3s cluster with three containers and no cloud services. Then I added workspaces and permissions. This is a field report on what LanceDB actually gives you for RAG, with the parts that bit me written down. Everything here runs on one Mac; the numbers come from a smoke test, not a benchmark.
 
+The code is public: [nf1s/rag-lancedb](https://github.com/nf1s/rag-lancedb). Every snippet below is shortened from it.
+
 ## Why LanceDB fits RAG
 
 A RAG index needs three things: store vectors, search them by similarity, and search the same text by keywords. Most setups reach for a vector database plus Elasticsearch, or a vector DB with a keyword add-on that is easy to forget. LanceDB gives you all three from one library:
