@@ -3,6 +3,7 @@ title: "How to use LanceDB for RAG: hybrid search, one table per workspace, and 
 published: false
 description: "A field report from building a local RAG stack on k3s: table design, replace-by-source ingest, native FTS + RRF hybrid search, per-workspace tables, and the embedded-database constraint that shapes the whole architecture."
 tags: rag, lancedb, python, kubernetes
+cover_image: https://raw.githubusercontent.com/nf1s/rag-lancedb/main/assets/cover-wide.png
 ---
 
 LanceDB is not a server. It is a library you import, and it reads and writes a directory on disk. That single fact is why it is pleasant to use for RAG, and why running it inside Kubernetes forces an unusual architecture.
